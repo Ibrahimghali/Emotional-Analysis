@@ -1,40 +1,62 @@
 # app/scraper/twitter_scraper.py
-import snscrape.modules.twitter as sntwitter
+
+import tweepy
 import pandas as pd
-from datetime import datetime, timedelta
-import random
+import os
+from dotenv import load_dotenv
 
 def scrape_twitter(query="depression", limit=100):
-    """Generate mock Twitter data for testing"""
-    print(f"Generating mock Twitter data for: {query} (limit: {limit})")
+    """
+    Basic Twitter scraping using bearer token authentication
+    """
+    # Load environment variables from .env file
+    load_dotenv()
     
-    # Create sample depression-related tweets
-    depression_tweets = [
-        "I've been feeling so depressed lately, nothing seems to help #Depression",
-        "Anxiety and depression are taking over my life #MentalHealth #Depression",
-        "Started therapy this week, hoping it helps with my depression #Recovery",
-        "Some days I can't even get out of bed #Depression #MentalHealthAwareness",
-        "The support from this community has been amazing for my recovery #Depression",
-        "Does anyone else feel completely empty inside? #Depression",
-        "My antidepressants finally seem to be working #Depression #Recovery",
-        "It's hard to explain depression to someone who's never experienced it",
-        "Having a particularly bad day with my depression today #MentalHealth",
-        "Finding joy in small things helps with my depression #SelfCare",
-    ]
+    print(f"Scraping Twitter for: {query} (limit: {limit})")
     
-    # Generate mock data
-    data = []
-    now = datetime.now()
+    # Get bearer token from environment variable
+    bearer_token = os.getenv("TWITTER_BEARER_TOKEN")
     
-    for i in range(min(limit, 20)):  # Generate up to 20 mock tweets
-        tweet_time = now - timedelta(hours=random.randint(1, 72))
-        data.append({
-            "id": f"tweet_{i}_{random.randint(10000, 99999)}",
-            "date": tweet_time.strftime("%Y-%m-%d %H:%M:%S"),
-            "content": random.choice(depression_tweets),  # Changed from "text" to "content"
-            "username": f"user_{random.randint(100, 999)}",
-            "like_count": random.randint(0, 200),
-            "retweet_count": random.randint(0, 50)
-        })
+    if not bearer_token:
+        raise ValueError("Twitter Bearer Token not found. Set the TWITTER_BEARER_TOKEN environment variable.")
     
-    return pd.DataFrame(data)
+    # Initialize Twitter client
+    client = tweepy.Client(bearer_token=bearer_token)
+    
+    # Simple search query
+    search_query = f"{query} lang:en -is:retweet"
+    
+    try:
+        # Make a single API request
+        response = client.search_recent_tweets(
+            query=search_query,
+            max_results=min(100, limit),  # API limit is 100 per request
+            tweet_fields=['created_at', 'public_metrics'],
+            user_fields=['username'],
+            expansions=['author_id']
+        )
+        
+        # Get user data
+        users = {user.id: user.username for user in response.includes['users']}
+        
+        # Process tweets
+        tweets_data = []
+        for tweet in response.data or []:  # Handle case where no tweets are found
+            tweets_data.append({
+                "id": str(tweet.id),
+                "date": tweet.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "content": tweet.text,
+                "username": users.get(tweet.author_id, "unknown"),
+                "like_count": tweet.public_metrics['like_count'],
+                "retweet_count": tweet.public_metrics['retweet_count']
+            })
+            
+            if len(tweets_data) >= limit:
+                break
+                
+        print(f"Successfully scraped {len(tweets_data)} tweets")
+        return pd.DataFrame(tweets_data)
+        
+    except Exception as e:
+        print(f"Error scraping Twitter: {e}")
+        raise
