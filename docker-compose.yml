@@ -1,17 +1,19 @@
 # docker-compose.yml
-version: '3.8'
 
 services:
-  # api:
-  #   build: .
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     - mongodb
-  #   environment:
-  #     - MONGODB_URL=mongodb://mongodb:27017
-  #   networks:
-  #     - depression-network
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=depression_analysis
+    networks:
+      - depression-network
 
   mongodb:
     image: mongo:latest
@@ -25,6 +27,11 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=password
       - MONGO_INITDB_DATABASE=depression_analysis
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   depression-network:
