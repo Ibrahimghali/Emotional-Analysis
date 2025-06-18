@@ -1,0 +1,35 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # api:
+  #   build: .
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - mongodb
+  #   environment:
+  #     - MONGODB_URL=mongodb://mongodb:27017
+  #   networks:
+  #     - depression-network
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - depression-network
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=depression_analysis
+
+networks:
+  depression-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
