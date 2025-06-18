@@ -30,8 +30,8 @@ This project analyzes depression-related content from social media (Twitter) to 
     ┌────────────┐    ┌─────────────┐    ┌───────────────┐
     │ FastAPI    │    │ Text        │    │ Sentiment     │
     │ Backend    │───>│ Processing  │───>│ Analysis &    │
-    └────────────┘    └─────────────┘    │ Topic Detection│
-    │                                └───────────────┘
+    └────────────┘    └─────────────┘    │Topic Detection│
+    │                                    └───────────────┘
     │                                       │
     ▼                                       ▼
     ┌────────────┐                       ┌───────────────┐
