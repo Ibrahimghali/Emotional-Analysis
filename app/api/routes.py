@@ -2,18 +2,12 @@ from fastapi import APIRouter, BackgroundTasks
 from app.scraper.twitter_scraper import scrape_twitter
 from app.nlp.sentiment_analyzer import analyze_sentiment
 from app.nlp.topic_detector import detect_topics
+from app.nlp.text_processor import clean_text, normalize_text
 from app.database.mongodb import init_db, get_posts
 
 router = APIRouter(
     tags=["api"]
 )
-
-# Helper function to clean text (since we had import issues earlier)
-def clean_text(text):
-    """Simple text cleaning function"""
-    if not text:
-        return ""
-    return text.strip().lower()
 
 @router.post("/scrape")
 async def start_scraping(background_tasks: BackgroundTasks):
@@ -21,26 +15,25 @@ async def start_scraping(background_tasks: BackgroundTasks):
     return {"message": "Scraping started in the background"}
 
 async def process_and_save_tweets():
-    # Get database connection directly
     db = await init_db()
-    tweets = scrape_twitter(limit=100)
+    tweets = scrape_twitter()
     
-    # Process each tweet
     for _, tweet in tweets.iterrows():
         try:
             tweet_content = tweet["content"]
             cleaned_text = clean_text(tweet_content)
+            normalized_text = normalize_text(tweet_content)
             
             sentiment = analyze_sentiment(cleaned_text)
             topics = detect_topics(cleaned_text)
             
-            # Save to database using the local db variable
             await db.posts.insert_one({
                 "tweet_id": tweet["id"],
                 "username": tweet["username"],
                 "date": tweet["date"],
                 "text": tweet_content,
                 "cleaned_text": cleaned_text,
+                "normalized_text": normalized_text,
                 "sentiment": sentiment,
                 "topics": topics,
                 "like_count": int(tweet["like_count"]),

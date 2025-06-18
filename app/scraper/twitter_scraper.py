@@ -6,7 +6,7 @@ import os
 import time
 from dotenv import load_dotenv
 
-def scrape_twitter(query="depression", limit=100):
+def scrape_twitter(query="depression", limit=15):
     """
     Twitter scraping with rate limit handling
     """
@@ -16,7 +16,7 @@ def scrape_twitter(query="depression", limit=100):
     print(f"Scraping Twitter for: {query} (limit: {limit})")
     
     # Get bearer token from environment variable
-    bearer_token = os.getenv("TWITTER_BEARER_TOKEN")
+    bearer_token = os.getenv("TWITTER_BEARER_TOKEN_1")
     
     if not bearer_token:
         raise ValueError("Twitter Bearer Token not found. Set the TWITTER_BEARER_TOKEN environment variable.")
@@ -31,7 +31,7 @@ def scrape_twitter(query="depression", limit=100):
         # Make a single API request with rate limit handling
         response = client.search_recent_tweets(
             query=search_query,
-            max_results=min(100, limit),
+            max_results=min(10, limit),
             tweet_fields=['created_at', 'public_metrics'],
             user_fields=['username'],
             expansions=['author_id']
