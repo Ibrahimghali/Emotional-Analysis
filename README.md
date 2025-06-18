@@ -1,145 +1,118 @@
-
 # 🧠 Depression Analysis Project
 
-## 📖 Overview
-This project analyzes depression-related content from social media (Twitter) to identify **patterns**, **sentiments**, and **topics**. It provides a FastAPI backend that:
+## 📘 Overview
 
-- Scrapes Twitter using the official API,
-- Processes the text (cleaning and normalization),
-- Performs sentiment analysis using Hugging Face models,
-- Detects topics based on keywords,
-- Stores results in MongoDB for retrieval and visualization.
+This project analyzes depression-related content from Twitter to uncover **patterns**, **sentiments**, and **topics**. It features a FastAPI backend that:
 
----
-
-## ✨ Features
-
-- ✅ Twitter data scraping with rate limit handling (Bearer Token)
-- ✅ Text cleaning and normalization
-- ✅ Sentiment analysis using DistilBERT
-- ✅ Topic detection via keyword matching
-- ✅ REST API endpoints for triggering and retrieving data
-- ✅ Asynchronous background processing
+* Scrapes tweets using the Twitter API
+* Cleans and normalizes text data
+* Performs sentiment analysis via Hugging Face transformers (DistilBERT)
+* Detects topics based on keyword matching
+* Stores results in MongoDB for later access and visualization
 
 ---
 
-##  🧱 System Architecture
+## ✨ Key Features
 
-    
-
-    ┌────────────┐    ┌─────────────┐    ┌───────────────┐
-    │ FastAPI    │    │ Text        │    │ Sentiment     │
-    │ Backend    │───>│ Processing  │───>│ Analysis &    │
-    └────────────┘    └─────────────┘    │Topic Detection│
-    │                                    └───────────────┘
-    │                                       │
-    ▼                                       ▼
-    ┌────────────┐                       ┌───────────────┐
-    │ Twitter    │                       │ MongoDB       │
-    │ Scraper    │                       │ Database      │
-    └────────────┘                       └───────────────┘
-
-    
+* ✅ Twitter data scraping with Bearer Token support and rate limit handling
+* ✅ Text preprocessing: cleaning, normalization, and stopword removal
+* ✅ Sentiment classification using DistilBERT
+* ✅ Rule-based topic detection
+* ✅ RESTful API for triggering scraping and retrieving posts
+* ✅ Asynchronous background processing with FastAPI
 
 ---
 
-## ⚙️ Installation
+## 🧱 Architecture
 
-### 🔧 Prerequisites
-
-- Python 3.8+
-- MongoDB (local or Docker)
-- Twitter API Bearer Token
+```
+ ┌────────────┐    ┌─────────────┐    ┌─────────────────┐
+ │ FastAPI    │ →  │ Text        │ →  │ Sentiment &     │
+ │ Backend    │    │ Processing  │    │ Topic Detection │
+ └────┬───────┘    └────┬────────┘    └────┬────────────┘
+      │                │                 │
+      ▼                ▼                 ▼
+ ┌────────────┐    ┌────────────┐    ┌──────────────┐
+ │ Twitter    │    │ NLP Utils  │    │ MongoDB      │
+ │ Scraper    │    │ (Cleaning) │    │ Storage      │
+ └────────────┘    └────────────┘    └──────────────┘
+```
 
 ---
 
-### 🚀 Setup
+## ⚙️ Installation & Setup
 
-Clone the repository:
+### 🔧 Requirements
+
+* Python 3.8+
+* Twitter API Bearer Token
+* Docker & Docker Compose
+
+### 🚀 Quickstart
+
+1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/depression-analysis.git
+git clone https://github.com/Ibrahimghali/depression-analysis.git
 cd depression-analysis
-````
-
-Create and activate a virtual environment:
-
-```bash
-python -m venv .venv
-
-# On Windows
-.\.venv\Scripts\activate
-
-# On macOS/Linux
-source .venv/bin/activate
 ```
 
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Create a `.env` file with your Twitter API credentials:
+2. **Create `.env` file for Twitter API**
 
 ```env
-TWITTER_BEARER_TOKEN=your_twitter_bearer_token
+TWITTER_BEARER_TOKEN=your_token_here
 ```
 
 ---
 
-### 🗃️ Start MongoDB (via Docker)
+## ▶️ Run the Application (Docker Compose)
+
+Build and start the containers:
 
 ```bash
-docker run -d -p 27017:27017 --name mongodb \
-  -e MONGO_INITDB_ROOT_USERNAME=admin \
-  -e MONGO_INITDB_ROOT_PASSWORD=password \
-  mongo
+docker-compose up --build
 ```
 
----
-
-## ▶️ Running the Application
-
-Start the API server:
+To run in the background:
 
 ```bash
-python -m app.main
+docker-compose up -d
 ```
 
-Then open your browser to access API docs:
+Check container status:
 
+```bash
+docker-compose ps
+```
+
+Once running, open your browser at:
 📄 [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
 ## 📡 API Endpoints
 
-| Method | Endpoint      | Description                              |
-| ------ | ------------- | ---------------------------------------- |
-| POST   | `/api/scrape` | Triggers Twitter scraping asynchronously |
-| GET    | `/api/posts`  | Retrieves all processed posts from DB    |
+| Method | Endpoint      | Description                               |
+| ------ | ------------- | ----------------------------------------- |
+| POST   | `/api/scrape` | Start Twitter scraping (async)            |
+| GET    | `/api/posts`  | Retrieve all processed posts from MongoDB |
 
 ---
 
 ## 🧪 Testing
 
-### ✅ Running Tests
-
-Run all tests with verbose output:
+Run tests with:
 
 ```bash
 python -m pytest tests/
 ```
 
-### 🧼 Test Coverage
-
-The tests verify:
+Test cases cover:
 
 * URL and emoji removal
 * Text normalization
 * Stopword removal
-* Robust text handling
+* Edge cases in preprocessing
 
 ---
 
@@ -148,22 +121,16 @@ The tests verify:
 ```
 depression-analysis/
 ├── app/
-│   ├── main.py                  # FastAPI application entry
-│   ├── api/
-│   │   └── routes.py            # API routes
-│   ├── database/
-│   │   └── mongodb.py           # MongoDB connection logic
+│   ├── main.py                  # Entry point
+│   ├── api/routes.py            # REST API endpoints
+│   ├── database/mongodb.py      # MongoDB connection
 │   ├── nlp/
-│   │   ├── sentiment_analyzer.py # Sentiment analysis (transformers)
-│   │   ├── text_processor.py     # Text cleaning and normalization
-│   │   └── topic_detector.py     # Keyword-based topic detection
-│   └── scraper/
-│       └── twitter_scraper.py    # Twitter API scraper
+│   │   ├── sentiment_analyzer.py
+│   │   ├── text_processor.py
+│   │   └── topic_detector.py
+│   └── scraper/twitter_scraper.py
 └── tests/
-    └── test_text_processor.py    # Unit tests for text processing
+    └── test_text_processor.py
 ```
 
 ---
-
-
-
