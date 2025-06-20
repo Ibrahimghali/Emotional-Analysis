@@ -3,23 +3,17 @@ import re
 import emoji
 import unicodedata
 import nltk
-from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-import os
+import functools
 
-# Initialize NLTK resources
-def load_nltk_resources():
-    try:
-        nltk.data.find('tokenizers/punkt')
-    except LookupError:
-        nltk.download('punkt')
+# Lazy loading of NLTK resources only when needed
+@functools.lru_cache(maxsize=1)
+def get_stopwords():
     try:
         nltk.data.find('corpora/stopwords')
     except LookupError:
-        nltk.download('stopwords')
-
-# Load resources when module is imported
-load_nltk_resources()
+        nltk.download('stopwords', quiet=True)
+    return set(stopwords.words('english'))
 
 def clean_text(text):
     if not text:
@@ -28,21 +22,15 @@ def clean_text(text):
     # Convert to string if not already
     text = str(text)
     
-    # Remove URLs
-    text = re.sub(r'https?://\S+|www\.\S+', '', text)
-    
-    # Remove user mentions (@username)
-    text = re.sub(r'@\w+', '', text)
-    
-    # Remove hashtag symbols (keep the text)
-    text = re.sub(r'#', '', text)
+    # Combine multiple regex operations for better performance
+    # Remove URLs, user mentions, hashtag symbols in one pass
+    text = re.sub(r'https?://\S+|www\.\S+|@\w+|#', '', text)
     
     # Remove emojis
     text = emoji.replace_emoji(text, replace='')
     
-    # Remove special characters and numbers
-    text = re.sub(r'[^\w\s]', '', text)
-    text = re.sub(r'\d+', '', text)
+    # Remove special characters and numbers in one pass
+    text = re.sub(r'[^\w\s]|\d+', '', text)
     
     # Convert to lowercase
     text = text.lower()
@@ -64,17 +52,13 @@ def normalize_text(text, remove_stopwords=False):
     # Clean the text first
     text = clean_text(text)
     
-    # Simple tokenization using split instead of word_tokenize
+    # Tokenize using simple split - consistent with our needs
     tokens = text.split()
     
-    # Remove stopwords if requested
+    # Remove stopwords if requested (lazy loading)
     if remove_stopwords:
-        # Ensure stopwords are loaded
-        load_nltk_resources()
-        stop_words = set(stopwords.words('english'))
-        tokens = [word for word in tokens if word.lower() not in stop_words]
+        stop_words = get_stopwords()
+        tokens = [word for word in tokens if word not in stop_words]
     
     # Join tokens back to text
-    text = ' '.join(tokens)
-    
-    return text
+    return ' '.join(tokens)
