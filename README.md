@@ -1,29 +1,29 @@
-# 🧠 Depression Analysis Project
+# Depression Analysis Project
 
-## 📘 Overview
+## Overview
 
-This project analyzes depression-related content from Twitter to uncover **patterns**, **sentiments**, and **topics**. It features a FastAPI backend that:
+This project focuses on analyzing depression-related content on Twitter to identify **patterns**, **sentiments**, and **topics**. It is powered by a FastAPI backend with the following capabilities:
 
 * Scrapes tweets using the Twitter API
 * Cleans and normalizes text data
-* Performs sentiment analysis via Hugging Face transformers (DistilBERT)
-* Detects topics based on keyword matching
-* Stores results in MongoDB for later access and visualization
+* Performs sentiment analysis using Hugging Face's DistilBERT
+* Detects topics through rule-based keyword matching
+* Stores results in MongoDB for access and visualization
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-* ✅ Twitter data scraping with Bearer Token support and rate limit handling
-* ✅ Text preprocessing: cleaning, normalization, and stopword removal
-* ✅ Sentiment classification using DistilBERT
-* ✅ Rule-based topic detection
-* ✅ RESTful API for triggering scraping and retrieving posts
-* ✅ Asynchronous background processing with FastAPI
+* Twitter data scraping with support for one or multiple Bearer Tokens (with rotation and rate limit handling)
+* Comprehensive text preprocessing: cleaning, normalization, and stopword removal
+* Sentiment classification using a pre-trained DistilBERT model
+* Rule-based topic detection
+* RESTful API for initiating scraping and retrieving results
+* Asynchronous background processing using FastAPI
 
 ---
 
-## 🧱 Architecture
+## System Architecture
 
 ```
  ┌────────────┐    ┌─────────────┐    ┌─────────────────┐
@@ -40,34 +40,46 @@ This project analyzes depression-related content from Twitter to uncover **patte
 
 ---
 
-## ⚙️ Installation & Setup
+## Installation and Setup
 
-### 🔧 Requirements
+### Requirements
 
-* Python 3.8+
-* Twitter API Bearer Token
-* Docker & Docker Compose
+* Python 3.8 or higher
+* One or more Twitter API Bearer Tokens
+* Docker and Docker Compose
 
-### 🚀 Quickstart
+### Quickstart
 
-1. **Clone the repository**
+1. Clone the repository:
 
-```bash
-git clone https://github.com/Ibrahimghali/depression-analysis.git
-cd depression-analysis
-```
+   ```bash
+   git clone https://github.com/Ibrahimghali/depression-analysis.git
+   cd depression-analysis
+   ```
 
-2. **Create `.env` file for Twitter API**
+2. Create a `.env` file and add your Twitter API Bearer Tokens:
 
-```env
-TWITTER_BEARER_TOKEN=your_token_here
-```
+   **For a single token:**
+
+   ```env
+   TWITTER_BEARER_TOKEN=your_token_here
+   ```
+
+   **For multiple tokens (used for automatic rotation):**
+
+   ```env
+   TWITTER_BEARER_TOKEN_1=your_first_token
+   TWITTER_BEARER_TOKEN_2=your_second_token
+   TWITTER_BEARER_TOKEN_3=your_third_token
+   ```
+
+   The system will automatically rotate between multiple tokens to handle rate limits. If only `TWITTER_BEARER_TOKEN` is present, it will be used as the default.
 
 ---
 
-## ▶️ Run the Application (Docker Compose)
+## Running the Application with Docker Compose
 
-Build and start the containers:
+To build and start the application:
 
 ```bash
 docker-compose up --build
@@ -79,29 +91,29 @@ To run in the background:
 docker-compose up -d
 ```
 
-Check container status:
+Check the status of the running containers:
 
 ```bash
 docker-compose ps
 ```
 
-Once running, open your browser at:
-📄 [http://localhost:8000/docs](http://localhost:8000/docs)
+Once running, open your browser and visit:
+[http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
-| Method | Endpoint      | Description                               |
-| ------ | ------------- | ----------------------------------------- |
-| POST   | `/api/scrape` | Start Twitter scraping (async)            |
-| GET    | `/api/posts`  | Retrieve all processed posts from MongoDB |
+| Method | Endpoint      | Description                                |
+| ------ | ------------- | ------------------------------------------ |
+| POST   | `/api/scrape` | Initiates asynchronous Twitter scraping    |
+| GET    | `/api/posts`  | Retrieves all processed posts from MongoDB |
 
 ---
 
-## 🧪 Testing
+## Testing
 
-Run tests with:
+To run unit tests:
 
 ```bash
 python -m pytest tests/
@@ -112,18 +124,18 @@ Test cases cover:
 * URL and emoji removal
 * Text normalization
 * Stopword removal
-* Edge cases in preprocessing
+* Edge cases in preprocessing logic
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 depression-analysis/
 ├── app/
-│   ├── main.py                  # Entry point
-│   ├── api/routes.py            # REST API endpoints
-│   ├── database/mongodb.py      # MongoDB connection
+│   ├── main.py                  # Application entry point
+│   ├── api/routes.py            # REST API route definitions
+│   ├── database/mongodb.py      # MongoDB connection handling
 │   ├── nlp/
 │   │   ├── sentiment_analyzer.py
 │   │   ├── text_processor.py
@@ -133,4 +145,3 @@ depression-analysis/
     └── test_text_processor.py
 ```
 
----
