@@ -1,4 +1,4 @@
-# Depression Analysis Project
+# Emotional-Analysis Project
 
 ## Overview
 
